@@ -1,50 +1,35 @@
 const { test, expect } = require('@playwright/test');
 const { chromium } = require('playwright');
 
-// Seach Functionality
-test('Seach Functionality', async ({ page }) => {
+// WishList
+test('WishList Functionality', async () => {
     // Launch a new browser instance
  const browser = await chromium.launch();
+ const context = await browser.newContext();
+ const page = await context.newPage();
 
-   // Navigate to the Amazon login page
+
    await page.goto('https://www.amazon.in');
-
- // Locate and interact with the login button
- await page.type('#twotabsearchtextbox','Redmi 13C');
+ await page.type('#twotabsearchtextbox','iphone 15');
  await page.keyboard.press('Enter');
 
- const isLoggedIn = await page.getByRole('link', { name: 'Redmi 13C (Stardust Black, 4GB RAM, 128GB Storage) | 90Hz Display | 50MP AI' }).nth(2);
 
-await expect(isLoggedIn).toBeVisible();
-await expect(isLoggedIn).toContainText("Redmi 13C");
+ const item = await page.locator('[data-cy="title-recipe"] h2 a span')
+ const firstItem = item.nth(0)
+ 
+await firstItem.scrollIntoViewIfNeeded();
+await expect(await firstItem.innerText()).toContain("iPhone 15");
+await firstItem.click();
+const newPage = await context.waitForEvent('page');
 
-await isLoggedIn.click();
+await expect(newPage.url()).toContain("Apple-iPhone-15");
+await newPage.waitForLoadState('domcontentloaded');
 
-await page.waitForTimeout(3000);
-
- await context.pages();
-
- await context.bringToFront();
-  // Switch to the new tab (second tab)
-  // const newPage = allPages[1];
-
-const addToWishListBtn = await page.getByText('Add to Wish List');
-
+const addToWishListBtn = await newPage.getByText("Add to Wish List");
 await addToWishListBtn.scrollIntoViewIfNeeded();
+await addToWishListBtn.click();
+await newPage.waitForTimeout(5000);
 
-await expect(addToWishListBtn).toBeVisible();
-
-await page.locator(addToWishListBtn).click();
-
-// const isWishListAdded = await page.isVisible('#ap_email');
-
-// if (isLogisWishListAddedgedIn) {
-//   console.log('Item added in wishlist successful!');
-// } else {
-//   console.log('Item added in wishlist failed.');
-// }
-
-
-     // Close the browser
+ 
   await browser.close();
 });
